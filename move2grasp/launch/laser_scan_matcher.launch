@@ -1,0 +1,11 @@
+<launch>
+	<node name="laser_scan_matcher_node" pkg="laser_scan_matcher" type="laser_scan_matcher_node"  
+          output="screen" >
+        <param name="fixed_frame" value = "odom"/>
+        <param name="base_frame" value = "base_footprint"/>
+        <param name="use_imu" value = "true"/>
+        <param name="max_iterations" value="10"/>
+		<remap from="imu_data" to="imu/data"/>
+		<remap from="scan" to="scan"/>
+    </node>
+</launch>

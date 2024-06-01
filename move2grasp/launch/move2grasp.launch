@@ -1,0 +1,85 @@
+<!--move2grab-->
+<!--SPARK技术讨论与反馈群：8346256-->
+<launch>
+	<!-- Arguments -->
+	<arg name="slam_methods" default="karto" doc="slam type [gmapping, cartographer, hector, karto, frontier_exploration]"/>
+	<arg name="configuration_basename" default="spark_lds_2d.lua"/>
+	<arg name="open_rviz" default="true"/>
+
+
+	<include file="$(find spark_description)/launch/spark_description_norviz.launch"/>
+	<!--include file="$(find spark_description)/launch/spark_description.launch"/-->
+
+
+	<include file="$(find spark_base)/launch/spark_base.launch">
+		<arg name="serialport" value="/dev/sparkBase"/>
+	</include>
+
+
+
+	<!--UARM机械臂-->
+	<include file="$(find swiftpro)/launch/pro_control_nomoveit.launch"/>
+	<!--深度相机-->
+	<include file="$(find astra_camera)/launch/astrapro.launch"/>
+
+	<!-- 3D sensor -->
+	<arg name="3d_sensor" default="3i_lidar"/>
+	<include file="$(find iiiroboticslidar2)/launch/3iroboticslidar2.launch">
+	</include>
+
+	<!-- SLAM: Gmapping, Cartographer, Hector, Karto, Frontier_exploration-->
+	<!-- <include file="$(find spark_slam)/launch/spark_$(arg slam_methods).launch">
+    		<arg name="configuration_basename" value="$(arg configuration_basename)"/>
+  	</include> -->
+
+	<!-- Map server -->
+	<arg name="map_file" default="$(find spark_slam)/scripts/test_map.yaml"/>
+	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+	<group ns='my_map'>
+		<node name="my_map_server" pkg="map_server" type="map_server" args="$(find move2grasp)/map/map.yaml">
+			<!-- <param name="frame_id" value="my_map"/> -->
+			<!-- <remap from="map" to="my_map" /> -->
+		</node>
+	</group>
+
+	<!-- Robot Pose EKF -->
+	<!-- <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
+		<param name="freq" value="30.0"/>
+		<param name="sensor_timeout" value="1.0"/>
+		<param name="odom_used" value="true"/>
+		<param name="imu_used" value="true"/>
+		<param name="vo_used" value="false"/>
+		<param name="debug" value="false"/>
+		<param name="self_diagnose" value="false"/>
+	</node> -->
+
+	<!-- AMCL -->
+	<arg name="custom_amcl_launch_file" default="$(find spark_navigation)/launch/includes/amcl/$(arg 3d_sensor)_amcl.launch.xml"/>
+	<arg name="initial_pose_x" default="0.0"/>
+	<arg name="initial_pose_y" default="0.0"/>
+	<arg name="initial_pose_a" default="0.0"/>
+	<include file="$(arg custom_amcl_launch_file)">
+		<arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+		<arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+		<arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+	</include>
+
+	<!-- Move base -->
+	<!-- <arg name="custom_param_file" default="$(find spark_navigation)/param/$(arg 3d_sensor)_costmap_params.yaml"/>
+  	<include file="$(find spark_navigation)/launch/includes/move_base.launch.xml">
+    		<arg name="custom_param_file" value="$(arg custom_param_file)"/>
+  	</include> -->
+
+
+	<!-- rviz -->
+	<group if="$(arg open_rviz)">
+		<node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find move2grasp)/rviz/spark_$(arg slam_methods).rviz"/>
+	</group>
+
+
+	<!-- <node pkg="move2grasp" type="move.py" name="move" output="screen"/> -->
+	<node pkg="move2grasp" type="grasp_auto.py" name="grasp_auto" output="screen"/>
+	<node pkg="move2grasp" type="voice.py" name="voicelbw" output="screen"></node>
+	<node pkg="move2grasp" type="marker.py" name="marker" output="screen"></node>
+
+</launch>
