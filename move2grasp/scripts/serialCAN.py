@@ -88,11 +88,12 @@ class SerialCAN:
     def SetTorqueAmps(self,torqueAmps1 = 0.0,torqueAmps2 = 0.0,torqueAmps3 = 0.0,torqueAmps4 = 0.0):
         torqueAmpsList = [torqueAmps1,torqueAmps2,torqueAmps3,torqueAmps4]
         torqueHex = []
+        AmpsLimit = 5.0
         for torqueAmps in torqueAmpsList:
-            if torqueAmps < -15.0:
-                torqueAmps = -15.0
-            if torqueAmps > 15.0:
-                torqueAmps = 15.0
+            if torqueAmps < -AmpsLimit:
+                torqueAmps = -AmpsLimit
+            if torqueAmps > AmpsLimit:
+                torqueAmps = AmpsLimit
         
             torqueAmpsFL = (float)(torqueAmps)
             torqueBin = torqueAmpsFL * 819.2

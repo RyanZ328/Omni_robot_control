@@ -11,7 +11,7 @@ class imuTransducer():
     def __init__(self):
         # self.read_distance_frequency = 100
         rospy.init_node('imuTransducer')
-        self.imuSerial = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.005)
+        self.imuSerial = serial.Serial('/dev/usb_imu', 115200, timeout=0.005)
         self.imu_pub = rospy.Publisher('/imu_ang_z' , Twist, queue_size=2)
         
         self.imu = Twist()
@@ -31,7 +31,7 @@ class imuTransducer():
         angle_calib = 0.05
         init_time = time.time()
         print("Calibrating...")
-        for i in range(500):
+        for i in range(1000):
             while(1):
                 try:
                     line = self.imuSerial.readline()
@@ -57,14 +57,17 @@ class imuTransducer():
                     if angle100 > 32768:
                         angle100 = angle100-65536
                     angle = angle100/100.0 # 单位：度
-                    self.imu.angular.z = angle
+                    print(angle,end = ' ')
                     angle = angle - (time.time() - init_time) * calib_ratio
+                    self.imu.angular.z = angle
                     print(angle)
                     self.imu_pub.publish(self.imu)
                     time.sleep(0.001)
             except Exception as e:
                 print("!!!!! Warning !!!!! : ", e)
+                time.sleep(0.001)
         rospy.spin()
+        
 
 if __name__ == '__main__':
     try:

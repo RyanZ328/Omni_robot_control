@@ -9,7 +9,8 @@ class laserTransducer():
     def __init__(self):
         # self.read_distance_frequency = 100
         rospy.init_node('laserTransducer')
-        self.LaserSensorBus = RS485Bus(name='RS485-1',device='/dev/ttyUSB2',timeout=0.006)
+        self.LaserSensorBus = RS485Bus(name='RS485-1',device='/dev/usb_laser',timeout=0.006)
+        # self.LaserSensorBus = RS485Bus(name='RS485-1',device='usb_laser',timeout=0.006)
         self.distance_pub = rospy.Publisher('/laser_distance' , Twist, queue_size=2)
         
         self.distance = Twist()
@@ -21,7 +22,7 @@ class laserTransducer():
                 print(self.distance.linear.x, end = ' ')
                 print(self.distance.linear.y)
                 self.distance_pub.publish(self.distance)
-                time.sleep(0.001)
+                time.sleep(0.002)
             except Exception as e:
                 print("!!!!! Warning !!!!! : ", e)
         rospy.spin()

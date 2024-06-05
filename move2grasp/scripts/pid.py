@@ -7,7 +7,7 @@ from scipy.interpolate import make_interp_spline as spline
 
 
 class PID():
-    def __init__(self, P=0.2, I=0.0, D=0.0,IntLimit = 1):
+    def __init__(self, P=0.2, I=0.0, D=0.0,IntLimit = 5):
         self.kp = P
         self.ki = I
         self.kd = D
