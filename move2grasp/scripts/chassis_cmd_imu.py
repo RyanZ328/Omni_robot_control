@@ -108,14 +108,14 @@ class ChassisControl():
             self.XposController.setValue = self.setXPos
             self.YposController.setValue = self.setYPos
             # See if the control is enabled and laser sensor is in range
-            if self.ctrl_enable == 1 and self.senseXPos != 201 and self.senseYPos != 201:
-            # if self.ctrl_enable == 1:
+            # if self.ctrl_enable == 1 and self.senseXPos != 201 and self.senseYPos != 201:
+            if self.ctrl_enable == 1:
                 self.ZspdController.setValue = self.ZposController.pidPosition(curValue=self.senseZAngle) + self.setZAngularSpd
                 self.force_cmd.angular.z = self.ZspdController.pidPosition(curValue=avgZAngSpd)
-                self.XspdController.setValue = self.XposController.pidPosition(curValue=self.senseXPos) + self.setXSpeed
-                self.force_cmd.linear.x = self.XspdController.pidPosition(curValue=avgXSpd)
-                self.YspdController.setValue = self.YposController.pidPosition(curValue=self.senseYPos) + self.setYSpeed
-                self.force_cmd.linear.y = self.YspdController.pidPosition(curValue=avgYSpd)
+                # self.XspdController.setValue = self.XposController.pidPosition(curValue=self.senseXPos) + self.setXSpeed
+                # self.force_cmd.linear.x = self.XspdController.pidPosition(curValue=avgXSpd)
+                # self.YspdController.setValue = self.YposController.pidPosition(curValue=self.senseYPos) + self.setYSpeed
+                # self.force_cmd.linear.y = self.YspdController.pidPosition(curValue=avgYSpd)
                 # Control Actuation
                 self.cmd_force_pub.publish(self.force_cmd)
                 print('Control enabled')

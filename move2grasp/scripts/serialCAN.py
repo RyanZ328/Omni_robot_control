@@ -27,6 +27,7 @@ class SerialCAN:
         self.device = device
         self.RSAddress = RSAddress
         self.Baud = Baud
+        self.AmpsLimit = 3.5
         self.CAN_init()
 
     def CAN_init(self):
@@ -88,7 +89,7 @@ class SerialCAN:
     def SetTorqueAmps(self,torqueAmps1 = 0.0,torqueAmps2 = 0.0,torqueAmps3 = 0.0,torqueAmps4 = 0.0):
         torqueAmpsList = [torqueAmps1,torqueAmps2,torqueAmps3,torqueAmps4]
         torqueHex = []
-        AmpsLimit = 5.0
+        AmpsLimit = self.AmpsLimit
         for torqueAmps in torqueAmpsList:
             if torqueAmps < -AmpsLimit:
                 torqueAmps = -AmpsLimit

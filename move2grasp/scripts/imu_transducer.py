@@ -11,6 +11,11 @@ class imuTransducer():
     def __init__(self):
         # self.read_distance_frequency = 100
         rospy.init_node('imuTransducer')
+        port_list = list(serial.tools.list_ports.comports())
+        print(port_list)
+        if len(port_list) == 0:
+            print('No serial port available')
+            exit(1)
         self.imuSerial = serial.Serial('/dev/usb_imu', 115200, timeout=0.005)
         self.imu_pub = rospy.Publisher('/imu_ang_z' , Twist, queue_size=2)
         
@@ -58,7 +63,7 @@ class imuTransducer():
                         angle100 = angle100-65536
                     angle = angle100/100.0 # 单位：度
                     print(angle,end = ' ')
-                    angle = angle - (time.time() - init_time) * calib_ratio
+                    angle = angle - (time.time() - init_time) * calib_ratio -angle_init
                     self.imu.angular.z = angle
                     print(angle)
                     self.imu_pub.publish(self.imu)
