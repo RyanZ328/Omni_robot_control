@@ -1,0 +1,7 @@
+KERNELS=="1-1.1:1.0", MODE:="0777", GROUP:="dialout", SYMLINK+="usb_imu"
+KERNELS=="1-1.3:1.0", MODE:="0777", GROUP:="dialout", SYMLINK+="usb_m3508"
+KERNELS=="1-1.4:1.0", MODE:="0777", GROUP:="dialout", SYMLINK+="usb_m3508"
+KERNELS=="3-2:1.0", MODE:="0777", GROUP:="dialout", SYMLINK+="usb_imu"
+KERNELS=="1-2:1.0", MODE:="0777", GROUP:="dialout", SYMLINK+="usb_laser"
+
+
