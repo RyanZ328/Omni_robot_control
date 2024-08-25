@@ -27,7 +27,7 @@ class SerialCAN:
         self.device = device
         self.RSAddress = RSAddress
         self.Baud = Baud
-        self.AmpsLimit = 3.5
+        self.AmpsLimit = 5.0
         self.CAN_init()
 
     def CAN_init(self):

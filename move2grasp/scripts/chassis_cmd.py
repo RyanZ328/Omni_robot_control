@@ -16,7 +16,7 @@ class ChassisControl():
     def __init__(self):
         rospy.init_node('ChassisControl')
         # 控制频率/IMU接收频率
-        self.ctrlRate = 500
+        self.ctrlRate = 400
         # 底盘合力/力矩发布节点
         self.cmd_force_pub = rospy.Publisher('/cmd_force',Twist,queue_size=2)
         # 激光传感器接受
@@ -33,11 +33,11 @@ class ChassisControl():
         self.ctrl_enable_sub = rospy.Subscriber('/enable_ctrl',Int16,callback=self.enable_sub_cb,queue_size=2)
         # self.imuSerial = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.005)
         self.ZspdController = PID(P=0.2,I=0.02,D=0.3,IntLimit=2) # 待调参
-        self.ZposController = PID(P=6.0,I=0.02,D=0.2,IntLimit=5) # 待调参
+        self.ZposController = PID(P=4.0,I=0.02,D=0.2,IntLimit=5) # 待调参
         self.XspdController = PID(P=0.2,I=0.05,D=0.002,IntLimit=5) # 待调参
-        self.XposController = PID(P=5.0,I=0.1,D=0.001,IntLimit=20) # 待调参
+        self.XposController = PID(P=4.0,I=0.1,D=0.001,IntLimit=20) # 待调参
         self.YspdController = PID(P=0.2,I=0.05,D=0.002,IntLimit=5) # 待调参
-        self.YposController = PID(P=5.0,I=0.1,D=0.001,IntLimit=20) # 待调参
+        self.YposController = PID(P=4.0,I=0.1,D=0.001,IntLimit=20) # 待调参
         self.rate = rospy.Rate(self.ctrlRate)
         self.filterBufferSize = 20
         self.force_cmd = Twist()

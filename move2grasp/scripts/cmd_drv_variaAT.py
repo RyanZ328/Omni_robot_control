@@ -13,7 +13,7 @@ class motorTransceiver():
         self.M3508 = SerialCAN(name='RS485-1',device='/dev/usb_m3508')
         self.force_sub = rospy.Subscriber('/cmd_force' , Twist, self.cmd_callback, queue_size=2)
         self.amps_pub = rospy.Publisher('/amps' , Float32MultiArray, queue_size=2)
-        self.biasTorqueAmps = 1.0
+        self.baselineATTorqueAmps = 0.3
         self.vel_x = 0.0
         self.vel_y = 0.0
         self.ang_z = 0.0
@@ -23,9 +23,9 @@ class motorTransceiver():
             curTime = time.time()
             if (curTime-self.timeout<0.2):
                 TorquesList =  self.inverseDynamics(front_xForce = self.vel_x,left_yForce = self.vel_y,twist_zTorque = self.ang_z)
-                self.biasedTorqueOutput(torqueList = TorquesList, biasTorqueAmps = self.biasTorqueAmps)
+                self.variableAntaTorqueOutput(torqueList = TorquesList, baselineATTorqueAmps = self.baselineATTorqueAmps)
             else:
-                self.biasedTorqueOutput(torqueList = [0.0,0.0,0.0,0.0], biasTorqueAmps = self.biasTorqueAmps)
+                self.variableAntaTorqueOutput(torqueList = [0.0,0.0,0.0,0.0], baselineATTorqueAmps = self.baselineATTorqueAmps)
             MotorCtrlRate.sleep()
         rospy.spin()
 
@@ -74,6 +74,26 @@ class motorTransceiver():
                             torqueAmps3 = ampsList[2] + biasTorqueAmps,
                             torqueAmps4 = ampsList[3] - biasTorqueAmps)
         biasedAmpsList = [ampsList[0] + biasTorqueAmps,ampsList[1] - biasTorqueAmps,ampsList[2] + biasTorqueAmps,ampsList[3] - biasTorqueAmps]
+        amps_msg = Float32MultiArray()
+        amps_msg.data = biasedAmpsList
+        self.amps_pub.publish(amps_msg)
+        
+    def variableAntaTorqueOutput(self,torqueList = [0.0,0.0,0.0,0.0],baselineATTorqueAmps = 0.05):
+        ampsList = [i*3 for i in torqueList]
+        directionVector = [1,-1,1,-1]
+        baselineATTorqueAmpsTemp = baselineATTorqueAmps
+        
+        for i in range(4):
+            if (ampsList[i]*directionVector[i]<0):
+                baselineATTorqueAmpsTempNew = baselineATTorqueAmps - ampsList[i]*directionVector[i]
+                if (baselineATTorqueAmpsTempNew > baselineATTorqueAmpsTemp):
+                    baselineATTorqueAmpsTemp = baselineATTorqueAmpsTempNew
+                pass
+            pass
+        
+        biasedAmpsList = [ampsList[0] + baselineATTorqueAmpsTemp,ampsList[1] - baselineATTorqueAmpsTemp,ampsList[2] + baselineATTorqueAmpsTemp,ampsList[3] - baselineATTorqueAmpsTemp]
+        
+        self.M3508.SetTorqueAmps(biasedAmpsList[0],biasedAmpsList[1],biasedAmpsList[2],biasedAmpsList[3])
         amps_msg = Float32MultiArray()
         amps_msg.data = biasedAmpsList
         self.amps_pub.publish(amps_msg)

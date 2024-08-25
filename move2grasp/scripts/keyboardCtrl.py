@@ -43,6 +43,10 @@ def keyboardLoop():
     circle_bool = 0
     circle_count = 0
     circle_radius = 100
+    step_angle_start_time = 0
+    step_pos_start_time = 0
+    astep_bool = 0
+    step_bool = 0
     while not rospy.is_shutdown():
         #print(pygame.event.get())
         key_list = pygame.key.get_pressed()
@@ -71,27 +75,76 @@ def keyboardLoop():
             pos_msg.angular.z  = 20
         if key_list[pygame.K_e]:
             pos_msg.angular.z  = -20
+        # if key_list[pygame.K_r]:
+        #     circle_bool = 1
+        # if key_list[pygame.K_x]:
+        #     circle_bool = 0
+        # if key_list[pygame.K_c]:
+        #     csv_msg.data = 1
+        # if key_list[pygame.K_z]:
+        #     csv_msg.data = -1
+        
+        # circle exp
         if key_list[pygame.K_r]:
             circle_bool = 1
-        if key_list[pygame.K_x]:
+            csv_msg.data = 1
+        if key_list[pygame.K_f]:
             circle_bool = 0
+        # step angle exp
+        if key_list[pygame.K_t]:
+            astep_bool = 1
+            csv_msg.data = 1
+        if key_list[pygame.K_g]:
+            astep_bool = 0
+        #step pos exp
+        if key_list[pygame.K_y]:
+            step_bool = 1
+            csv_msg.data = 1
+        if key_list[pygame.K_h]:
+            step_bool = 0
+        
+        
         if key_list[pygame.K_c]:
             csv_msg.data = 1
         if key_list[pygame.K_z]:
             csv_msg.data = -1
-        if key_list[pygame.K_LSHIFT]: # 使能控制器
+        if key_list[pygame.K_LSHIFT]: # 手操扭矩直通底盘
             circle_bool = 0
             enable_msg.data = 2
             pos_msg.angular.z = pos_msg.angular.z/2
             pos_msg.linear.x  = pos_msg.linear.x/5
             pos_msg.linear.y  = pos_msg.linear.y/5
+            
+        if astep_bool == 1:
+            circle_count = circle_count+1
+            if circle_count > ratefreq:
+                pos_msg.angular.z  = 20
+        if astep_bool == 1 and circle_count >= 5 * ratefreq:
+            astep_bool = 0
+            circle_count = 0
+            csv_msg.data = -1
+            
+        if step_bool == 1:
+            circle_count = circle_count+1
+            if circle_count > ratefreq:
+                pos_msg.linear.x  = 100
+        if step_bool == 1 and circle_count >= 5 * ratefreq:
+            step_bool = 0
+            circle_count = 0
+            csv_msg.data = -1
+        
         if circle_bool == 1:
             circle_count = circle_count+1
-            pos_msg.linear.x = math.sin(circle_count / ratefreq * circleAngular_spd_rad_s) * circle_radius
-            pos_msg.linear.y = math.cos(circle_count / ratefreq * circleAngular_spd_rad_s) * circle_radius
-        # if circle_bool == 0:
-        #     pos_msg.linear.x = math.sin(circle_count / ratefreq * circleAngular_spd_rad_s) * circle_radius
-        #     pos_msg.linear.y = math.cos(circle_count / ratefreq * circleAngular_spd_rad_s) * circle_radius
+            if circle_count > 100:
+                pos_msg.linear.x = math.sin((circle_count-100) / ratefreq * circleAngular_spd_rad_s) * circle_radius
+                pos_msg.linear.y = math.cos((circle_count-100) / ratefreq * circleAngular_spd_rad_s) * circle_radius
+        if circle_bool == 1 and circle_count >= 2 * ratefreq + 100:
+            pos_msg.linear.x = 0
+            pos_msg.linear.y = 0
+        if circle_bool == 1 and circle_count >= 2 * ratefreq + 200:
+            circle_bool = 0
+            circle_count = 0
+            csv_msg.data = -1
         csv_state_pub.publish(csv_msg)
         ctrl_enable_pub.publish(enable_msg)
         cmd_pos_pub.publish(pos_msg)
